@@ -1,6 +1,7 @@
 //SET BUTTONS TO START ON THE PAGE
-var comedians = ["Kevin Hart", "Joe Rogan", "Dave Chappelle", "Jerry Seinfeld"];
+var comedians = ["Kevin Hart", "Joe Rogan", "Amy Schumer", "Dave Chappelle", "Jerry Seinfeld", "Tiffany Haddish", "Tom Segura", "Amy Poehler", "Katt Williams", "Martin Lawrence", "Sarah Silverman", "Chris Rock", "Ellen Degeneres"];
 var person;
+var download;
 
 function alertComedianName() {
     var comedianName = $(this).attr("data-name");
@@ -26,6 +27,11 @@ $("#add-name").on("click", function() {
 
     event.preventDefault();
 
+    if ($("#comedian-input").val().trim() === "") {
+        console.log("add something");
+        return;
+    }
+
     var comedianName = $("#comedian-input").val().trim();
 
     comedians.push(comedianName);
@@ -33,6 +39,8 @@ $("#add-name").on("click", function() {
     console.log(comedians); 
 
     renderButtons();
+
+    $("#comedian-input").empty();
 
 })
 
@@ -52,16 +60,19 @@ $("body").on("click", "button", function() {
     })
     .then(function(response) {
 
-        $(".gifs-appear-here").empty();
-
         var results = response.data;
 
         console.log(results);
 
+        // LOOP TO CREATE DIVS FOR EACH GIF 
         for (var j = 0; j < results.length; j++) {
-            var gifDiv = $("<div class='comedian'>");
+            var gifDiv = $("<div class='col-md-6 comedian'>");
+            // var downloadDiv = $("<p class='col-md-6 download'>");
             var rating = results[j].rating;
-            var p = $("<p>").text("Rating: " + rating);
+            var title = results[j].title;
+            // var downloadButton = $("<button>").text("CLICK TO DOWNLOAD");
+            var pInfo = $("<div class='row' <p>").text("TITLE: " + title.toUpperCase() + " || " + "RATING: " + rating.toUpperCase());
+            var pDownload = $("<div class='row download' <button>").text("CLICK TO DOWNLOAD")
             var personImage = $("<img>");
             personImage.attr("src", results[j].images.fixed_height_still.url,);
             personImage.attr("data-still", results[j].images.fixed_height_still.url,);
@@ -70,13 +81,18 @@ $("body").on("click", "button", function() {
             personImage.attr("class", "comedianGif");
             
 
-            gifDiv.append(p);
+            
+            gifDiv.append(pInfo);
             gifDiv.append(personImage);
+            gifDiv.append(pDownload);
+            // downloadDiv.append(downloadButton);
 
             $(".gifs-appear-here").prepend(gifDiv);
+            // $(gifDiv).append(downloadDiv);
         
         }
 
+            // CAUSES GIF TO START AND STOP ON CLICK
             $("body").on("click", ".comedianGif", function() {
                 console.log(this);
                 console.log($(this).attr("data-state"));
@@ -96,10 +112,31 @@ $("body").on("click", "button", function() {
                 // $(this).attr("src", results[j].images.fixed_height.url);
             });
 
+            // DOWNLOADS GIF ON USER CLICK OF 'CLICK TO DOWNLOAD'
+            $("body").on("click", ".download", function(e) {
+                console.log("must want to download");
+                e = e || window.event;
+                var element = e.target || e.srcElement;
+                if (element.type === "gif") {
+                    console.log("this is true");
+                    var name = element.nameProp;
+                    var address = element.href;
+                    saveGifAs1(element.nameProp, element.href);
+                    return false;
+                } else 
+                    return true;
+            });
+            
+            function saveGifAs1(name, address) {
+                if (confirm("You want to download this gif?")) {
+                    window.win = open(address);
+                    setTimeout("win.documen.execCommand('SaveAs')", 100);
+                    setTimeout("win.close()", 500);
+                }
+            }
+
     })
 
 })
-    
-
 
 renderButtons();
